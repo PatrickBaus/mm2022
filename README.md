@@ -3,4 +3,4 @@ This is my contribution of a quick presentation at the [Metrology Meeting 2022](
 
 Compiled using LuaLaTeX.
 
-![Metrology Meeting 2022](images/27_08_22_Save the Date_MetrologyMeeting.png)
+![Metrology Meeting 2022](images/27_08_22_Save_the_Date_MetrologyMeeting.png)
