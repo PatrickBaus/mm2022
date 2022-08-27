@@ -1,0 +1,51 @@
+\documentclass[tikz]{standalone}
+
+\usepackage{tikz}
+\usepackage{siunitx}
+\usepackage{circuitikz}
+
+\usetikzlibrary{fit}
+
+\begin{document}
+    \begin{circuitikz}[
+        scale=0.45,
+        transform shape,
+        european resistors,
+    ]
+            % Help lines for debugging
+            %\draw[help lines] (0,-6) grid (30,0);
+            \tikzstyle{every node}=[font=\Large]
+            % FET currenct source
+            \draw
+            (0,0) node[left, align=right](Vdiode) {V$_{\text{diode}}$\\\qty{12}{\V}} to [short, o-] (2,0)
+            to [zD, l_=LM399, i>_=\qty{1}{\mA}, invert, *-*] ++(0,-5)
+            to [R, -, l_=R$_{\text z}$] ++(0,-2)  --++ (0,-0.5) node[vee]{\qty{-15}{\V}} node[below](Vneg){}
+            (2,0) -|++ (2,-3) to [pR, n=POT, l_=R$_{\text{set}}$] ++(0,-2) --+ (-2,0)
+            (POT.wiper) ++(2.5,0.5) node[op amp](opamp){}
+            (opamp.+) -- (POT.wiper)
+            (opamp.out) --++ (1,0) node[pigfete, anchor=gate](FET){}
+            (FET.S) --++ (0,1) coordinate (Rs) to [R, l^=R$_{\text s}$, *-] ++(0,2) to [short, -*] (4,0)
+            (opamp.-) -|++ (-0.5,1) -- (Rs)		(Rs) -- (FET.S)
+            (opamp.out) -- (FET.G)
+            (FET.D) --++ (0,-0.5) to [led] ++(0,-2)
+            node[ground]() {}
+            ;
+            \node[draw=red, rounded corners=2pt, fit={(Vdiode) ($(Vneg) +(0,-1)$) ($(FET.east) + (0.5,0)$)}] (ConstantCurrentSource){};
+            \node[red, above] at (ConstantCurrentSource.north) {Unidirectional Constant Current Source};
+            % Howland current source
+            \draw
+            (Rs) ++ (4,0) node[op amp, xscale=-1](opamp2){}
+            ($(Rs) + (2,0)$) coordinate(Opamp2Output)
+            (opamp2.out) -- (Opamp2Output) |-++ (1,2) to [R, -*] ++(3,0) coordinate(R1)
+            to [R, -] ++ (3,0) node[ground]() {} node[anchor=west](ModInInv){}
+            (R1) |- (opamp2.-)
+            (Opamp2Output) to [short, *-] ++(0,-2)
+            --++(1,0) to [R, -*] ++(3,0) coordinate(R3)
+            to [R, -] ++ (3,0) node[ocirc] {} node[anchor=west](ModIn) {Mod In}
+            (R3) |- (opamp2.+)
+            (R3) |- ($(FET.D) + (0,-0.5)$) node[circ]{}
+            ;
+            \node[draw=blue, rounded corners=2pt, fit={(ModIn) ($(Opamp2Output) + (-0.25,0)$) ($(ModInInv) + (0,0.25)$)}] (HowlandCurrentSource){};
+            \node[blue, above] at (HowlandCurrentSource.north) {Bidirectional Modulation Current Source};
+    \end{circuitikz}
+\end{document}

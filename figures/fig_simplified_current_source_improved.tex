@@ -1,0 +1,63 @@
+\documentclass[tikz]{standalone}
+
+\usepackage{tikz}
+\usepackage{siunitx}
+\usepackage{circuitikz}
+
+\begin{document}
+    \usetikzlibrary{arrows, fit}
+    \begin{circuitikz}[
+        scale=0.45,
+        transform shape,
+        european resistors,
+    ]
+        % Help lines for debugging
+        %\draw[help lines] (0,-8) grid (30,0);
+        \tikzstyle{every node}=[font=\Large]
+        % FET currenct source
+        \draw
+        (0,0) node[left, align=right](Vdiode) {V$_{\text{diode}}$\\\qty{12}{\V}} to [short, o-] (3,0)
+        to [short, *-] ++(0,-3)
+        ++(0,-1) node[draw,thick,minimum width=2cm,minimum height=2cm](DAC){DAC}
+        ++(4,0.5) node[op amp](opamp){}
+        (opamp.+) -- (DAC.east)
+        (DAC.south) to [short, -o] ++(0,-0.5) node[below] {V$_{\text{ref}}$}
+        (DAC.west) to [short, -o] ++(-0.5,0) node[left] {to MCU}
+        (opamp.out) --++ (1,0) node[pigfete, anchor=gate](FET){}
+        (FET.S) --++ (0,1) coordinate (Rs) to [R, l^=R$_{\text s}$, *-] ++(0,2) -- (2,0)
+        (opamp.-) -|++ (-0.5,1) -- (Rs)
+        (FET.D) --++ (0,-0.5) to [led, -] ++(0,-1.5)
+        ($(FET.gate)+ (0,-3.5)$) node[pigfete, anchor=gate](FET2){}
+        ($(opamp) + (0,-3.5)$) node[op amp](opamp2){}
+        (opamp2.out) -- (FET2.G)
+        (opamp2.-) --++ (-0.5,0) |- ($(FET.D) + (0,-0.5)$) coordinate(virtualGnd)
+        (opamp2.+) --++ (-0.5,0) node[ground]() {}
+        (FET2.D) node[vee]{$-\text V_{\text{diode}}$} node[below](Vneg){}
+        ;
+        \node[draw=red, rounded corners=2pt, fit={(Vdiode) ($(Vneg) +(0,-1)$) ($(FET.east) + (0.75,0)$)}] (ConstantCurrentSource){};
+        \node[red, above] at (ConstantCurrentSource.north) {Constant Current Source};
+        % Howland current source
+        \draw
+        (Rs) ++ (4,0) node[op amp, xscale=-1](opamp2){}
+        ($(Rs) + (2,0)$) coordinate(Opamp2Output)
+        (opamp2.out) -- (Opamp2Output) |-++ (1,2) to [R, -*] ++(3,0) coordinate(R1)
+        to [R, -] ++ (3,0) node[ground]() {} node[anchor=west](ModInInv){}
+        (R1) |- (opamp2.-)
+        (Opamp2Output) to [short, *-] ++(0,-2)
+        --++(1,0) to [R, -*] ++(3,0) coordinate(R3)
+        to [R, -] ++ (3,0) node[ocirc] {} node[anchor=west](ModIn) {Mod In}
+        (R3) |- (opamp2.+)
+        ($(FET.D) + (0,-0.5)$) to [short, *-] ++(2,0) coordinate(Rb) to [R, -] ++(2,0) -| (R3)
+        ;
+        \node[draw=blue, rounded corners=2pt, fit={(ModIn) ($(Rb) + (0,-0.25)$) ($(Opamp2Output) + (-0.25,0)$) ($(ModInInv) + (0,0.25)$)}] (HowlandCurrentSource){};
+        \node[blue, above] at (HowlandCurrentSource.north) {Modulation Current Source};
+        % Annotations
+        % Virtual ground label
+        \node[orange, font=\bfseries](vGndLabel) at (14,-7) {\LARGE Virtual Ground};
+        \path[orange, ->, very thick, >=stealth'] (vGndLabel) edge node {} (virtualGnd);
+        % Current source
+        \node[draw=orange, very thick, rounded corners=2pt, fit={(opamp) ($(Rs) + (0.25,2)$)}] (CurrentSource){};
+        \node[orange, font=\bfseries](2xCurrentSource) at (12,1) {\LARGE 2x};
+        \path[orange, ->, very thick, >=stealth'] (2xCurrentSource) edge node {} (CurrentSource);
+    \end{circuitikz}
+\end{document}

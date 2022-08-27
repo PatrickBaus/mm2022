@@ -1,0 +1,225 @@
+\documentclass[color={accentcolor=1b}, authorontitle=true]{tudabeamer}
+\usepackage{hyperref}
+\usepackage[subpreambles=true]{standalone}
+\usepackage{import}
+\usepackage[version=4]{mhchem}
+\usepackage{siunitx}
+\usepackage{tikz}
+
+\usetikzlibrary{positioning}
+
+\sisetup{
+    mode=text
+}
+\DeclareSIUnit{\ppm}{ppm}
+\DeclareSIUnit{\ppb}{ppb}
+
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\date{August 27, 2022}
+
+\title{The Quest for Quiet - Tales from the Lab}
+\author[P. Baus et al.]{P.~Baus, G.~Birkl}
+\department{Physik}
+\institute{Institut für Angewandte Physik and GSI ARTEMIS}
+
+\titlegraphic*{\includegraphics{images/title.png}}
+\logo*{\includegraphics{images/titel_apq-logo.pdf}}
+
+\begin{document}
+
+\AtBeginSection[] {
+    \begin{frame}
+        \frametitle{Contents}
+        \tableofcontents[currentsection, subsectionstyle=show/show/shaded, subsubsectionstyle=show/show/show/hide]
+    \end{frame}
+}
+
+\maketitle
+
+\section{Introduction}
+\subsection{The Project}
+\begin{frame}{The Project\\\textnormal{\small{Building a Quantum Computer}}}
+    \begin{columns}[T] % align columns
+        \begin{column}{.48\textwidth}
+            Goal: Quantum computer with single atoms
+            \begin{itemize}
+                \item Needs lasers (dozens!)...
+                \item and current sources...
+                \item and voltage references...
+            \end{itemize}
+        \end{column}
+        \hfill
+        \begin{column}{.48\textwidth}
+            \begin{figure}[h]
+                \includegraphics[width=0.75\textwidth]{images/quips.png}
+                \caption{Array of 15x15 trapped neutral atoms}
+            \end{figure}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\section{Implementation}
+\subsection{Laser Current Driver}
+\begin{frame}{Diode Laser System\\\textnormal{\small{Requirements}}}
+    Requirements:
+    \begin{itemize}
+        \item Low noise
+        \item Low drift with temperature (\qty{<1}{\ppm \per \kelvin})
+        \item Output current: up to \qty{500}{\mA}
+        \item Compliance voltage: up to \qty{10}{\V}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Current Driver\\\textnormal{\small{The state of the art}}}
+    \begin{figure}
+        \only<1>{\import{figures/}{fig_simplified_current_source}}\only<2>{\import{figures/}{fig_simplified_current_source_annotated}}
+        \only<1>{\caption{Simplified current source based on \cite{Libbrecht-Hall}}}\only<2>{\caption{Simplified current source based on \cite{Libbrecht-Hall}, inset: \cite{IRF9610}}}
+    \end{figure}
+    \begin{tikzpicture}[remember picture, overlay]
+        \only<2>{
+            \node[draw=blue, inner sep=0.5, anchor=west] (irf9610 saturation) at (6.7,4) {\includegraphics[width=.38\linewidth]{images/irf9610_saturation.png}};
+        }
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Current Driver\\\textnormal{\small{Our solution}}}
+    \begin{figure}
+        \import{figures/}{fig_simplified_current_source_improved}
+        \caption{Simplified current source, APQ design}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Current Driver\\\textnormal{\small{Noise Source}}}
+    \begin{columns}[T] % align columns
+        \begin{column}{.48\textwidth}
+            Sources of Noise:
+            \begin{itemize}
+                \item Wideband
+                \begin{itemize}
+                    \item Reference noise can be filtered
+                    \item Op-amp must be low noise (AD797)
+                \end{itemize}
+                \item Low frequency noise
+                \begin{itemize}
+                    \item Dominated by reference noise
+                    \item LM399 vs. ADR1399 vs. LTZ1000
+                    \item Popcorn noise!
+                    \item References need to be tested. Each and every one!?
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+        \hfill
+        \begin{column}{.48\textwidth}
+            \begin{figure}[h]
+                \includegraphics[width=0.9\textwidth]{images/reference_board.png}
+                \caption{LM399 \qty{-15}{\volt} reference, Available at \cite{lm399_reference}}
+            \end{figure}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\subsection{Testing Voltage References}
+\begin{frame}{Testing Voltage References}
+    \begin{figure}
+        \import{figures/}{how_to_test}
+        \caption{Test setup for voltage references. Images taken from: \cite{k2002}}
+    \end{figure}
+    \begin{itemize}
+        \item 10 measurants every \qty{18}{\second} (\num{2e5} relay operations @ \qty{1000}{\hour})
+        \item Keithley 2000-SCAN is rated at \numrange{1e5}{1e8} operations
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Testing \\\textnormal{\small{Corona and Home Office}}}
+    \begin{figure}[h]
+        \includegraphics[width=0.63\textwidth]{images/home_office.JPG}
+        \caption{Reverse engineering the 2000-SCAN protocol }
+    \end{figure}
+\end{frame}
+
+\subsection{Open Source Scanner Card}
+\begin{frame}{Testing \\\textnormal{\small{Open Source Scanner Card}}}
+    \begin{columns}[T] % align columns
+        \begin{column}{.48\textwidth}
+            \begin{itemize}
+                \item 10- or 20-channel scanner card
+                \item All solid state relays
+                \item Silent
+                \item iCE40 FPGA-based to meet timing requirements of the K2002
+                \ item Fully compatible with DMM6500 and Model 200x
+                \item Open source toolchain
+            \end{itemize}
+
+        \end{column}
+        \hfill
+        \begin{column}{.48\textwidth}
+            \begin{figure}[h]
+                \includegraphics[width=0.9\textwidth]{images/scanner_card.png}
+                \caption{Available at \cite{scan2000}}
+            \end{figure}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\subsection{LM399 vs. ARD1399}
+\begin{frame}{Test results\\\textnormal{\small{LM399 vs. ARD1399}}}
+    \begin{figure}
+        \includegraphics[width=0.9\textwidth]{images/lm399_burnin.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Test results\\\textnormal{\small{In numbers}}}
+    Our experience with the LM399/ARD1399:
+    \begin{itemize}
+        \item All diodes are tested over \qty{1000}{\hour}
+        \item Tested over 100 LM399 samples
+        \item Tested around 10 ADR1399 (100 more on order)
+        \item LM399 popcorn noise is about {\color{red}\qtyrange{0.4}{0.6}{\ppm}}
+        \item Around {\color{red}\qtyrange{40}{50}{\percent}} of the LM399s show excess popcorn noise and get tossed
+        \item ADR1399 shows (nearly) no popcorn noise
+    \end{itemize}
+
+    \Large{Is the ADR1399 the future? - Time will tell. See you in a few months.}
+\end{frame}
+
+\begin{frame}[plain, c]
+    \centering
+    \Huge Thank you very much for your attention!
+    \begin{tikzpicture}[remember picture, overlay]
+        \node (logo artemis) at (-6.5,3.3) {\includegraphics[width=.25\linewidth]{images/ARTEMIS_logo.pdf}};
+        \node (logo apq) at (-2.5,3.3) {\includegraphics[width=.35\linewidth]{images/titel_apq-logo.pdf}};
+        \node (logo oshw) at (-7,-1) {\includegraphics[width=.13\linewidth]{images/oshw-logo.pdf}};
+        \node (logo bmbf) at (-2.5,-1) {\includegraphics[width=.25\linewidth]{images/BMBF_Logo.pdf}};
+        \node (logo hfhf) at (2,-1) {\includegraphics[width=.3\linewidth]{images/hfhf-logo.jpg}};
+        \node (logo tuda) at (2,3.3) {\includegraphics[width=.35\linewidth]{tuda_logo.pdf}};
+        \node (logo hgs-hire) at (1,-3) {\includegraphics[width=.5\linewidth]{images/logo-hgs-hire-big.png}};
+        \node (logo gsi) at (-7,-3) {\includegraphics[width=.25\linewidth]{images/GSI_Logo_cmyk.pdf}};
+        \node (logo fair) at (-4,-3) {\includegraphics[width=.25\linewidth]{images/FAIR_Logo_cmyk.pdf}};
+    \end{tikzpicture}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Bibliography}
+    \bibliographystyle{unsrt}
+    \bibliography{bibliography}
+\end{frame}
+
+\section*{Suplemental Material}
+\begin{frame}{Laser Resonator}
+    \center{
+        \includegraphics[width=.8\linewidth]{images/resonator.JPG}
+    }
+\end{frame}
+
+\begin{frame}{Current Driver\\\textnormal{\small{Comparison with commercial alternatives}}}
+    \begin{figure}
+        \centering
+        \scalebox{0.7}{
+            \input{figures/noise_spectrum.pgf}
+         }
+        \caption{Current noise spectral density of different commercial drivers}
+    \end{figure}
+\end{frame}
+
+\end{document}

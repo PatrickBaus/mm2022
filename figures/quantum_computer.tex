@@ -1,0 +1,20 @@
+\documentclass[tikz, crop]{standalone}
+
+\usepackage{tikz}
+
+\begin{document}
+    \usetikzlibrary {arrows.meta,positioning}
+    \begin{tikzpicture}[]
+        \node (quips) at (0,0) {Quantum Computer};
+        \node (quips_image) [right=of quips] {\includegraphics[width=1cm]{quips.png}};
+        \node (lasers) [below=of quips] {Diode Lasers};
+        \node [right=of lasers] {\includegraphics[width=2cm]{../images/resonator.JPG}};
+        \node (driver) [below=of lasers] {Current Sources};
+        \node [right=of driver] {\includegraphics[width=1.2cm]{current_driver.JPG}};
+        \node (references) [below=of driver] {Voltage References};
+        \node [right=of references] {\includegraphics[width=1.3cm]{voltage_references.JPG}};
+        \draw[line width=0.5mm, -Stealth] (quips) -- (lasers);
+        \draw[line width=0.5mm, -Stealth] (lasers) -- (driver);
+        \draw[line width=0.5mm, -Stealth] (driver) -- (references);
+    \end{tikzpicture}
+\end{document}

@@ -1,0 +1,17 @@
+\documentclass[crop,tikz]{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\begin{document}
+    \begin{tikzpicture}[node distance=-0.1cm]
+        \node (k2002) at (0,0) {
+            \includegraphics[width=3cm] {../images/k2002.jpg}};
+        \node[scale=3] (plus1) [right=of k2002] {+};
+        \node (scanner) [right=of plus1] {
+            \includegraphics[width=3cm] {../images/2000_scan.png}};
+        \node[scale=3] (plus2) [right=of scanner] {+};
+        \node (thermal) [right=of plus2] {
+            \includegraphics[width=3cm] {../images/thermal chamber.jpg}};
+    \end{tikzpicture}
+\end{document}
